@@ -3,7 +3,6 @@
     "concurrently": "^9.2.0"
   },
   "scripts": {
-  "dev": "concurrently \"npm run dev --prefix client\" \"node server/server.js\""
-}
-
+    "dev": "concurrently \"npm run dev --prefix client\" \"node server/server.js\""
+  }
 }

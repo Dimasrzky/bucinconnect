@@ -1,43 +1,125 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import './index.css';
 
-function App() {
-  const [data, setData] = useState(null)
-  const [count, setCount] = useState(0)
+// Import Components
+import LandingPage from './components/LandingPage';
+import LoginPage from './components/LoginPage';
+import Dashboard from './components/Dashboard';
+import Timeline from './components/Timeline';
+import Countdown from './components/Countdown';
+import Wishlist from './components/Wishlist';
+import Quiz from './components/Quiz';
+import MoodTracker from './components/MoodTracker';
+import MusicGallery from './components/MusicGallery';
+import GameMemory from './components/GameMemory';
+import TimeCapsule from './components/TimeCapsule';
 
-  useEffect(() => {
-    fetch('http://localhost:5000/api/hello')
-      .then(res => res.json())
-      .then(data => setData(data.message))
-  }, [])
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
 
+// App Component with Routing
+const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="app">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          
+          {/* Protected Routes */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/timeline" 
+            element={
+              <ProtectedRoute>
+                <Timeline />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/countdown" 
+            element={
+              <ProtectedRoute>
+                <Countdown />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/wishlist" 
+            element={
+              <ProtectedRoute>
+                <Wishlist />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/quiz" 
+            element={
+              <ProtectedRoute>
+                <Quiz />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/mood-tracker" 
+            element={
+              <ProtectedRoute>
+                <MoodTracker />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/music-gallery" 
+            element={
+              <ProtectedRoute>
+                <MusicGallery />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/game-memory" 
+            element={
+              <ProtectedRoute>
+                <GameMemory />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/time-capsule" 
+            element={
+              <ProtectedRoute>
+                <TimeCapsule />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <h1>{data || "Loading..."}</h1>
-      <div className="card">
-        <button onClick={() => setCount(count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </Router>
+  );
+};
 
-export default App
+export default App;
