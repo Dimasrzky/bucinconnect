@@ -1,333 +1,342 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Heart, Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
 
 const LoginPage = () => {
-  const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    name: '',
+    partnerName: '',
+    confirmPassword: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({});
+  const [hearts, setHearts] = useState([]);
 
+  // Generate floating hearts
   useEffect(() => {
-    // Check if user is already authenticated
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [navigate]);
-
-  useEffect(() => {
-    // Create floating hearts animation
-    const createFloatingHeart = () => {
-      const heart = document.createElement('div');
-      heart.innerHTML = ['💕', '💖', '💝', '💗', '💓'][Math.floor(Math.random() * 5)];
-      heart.className = 'login-floating-heart';
-      heart.style.cssText = `
-        position: fixed;
-        left: ${Math.random() * 100}vw;
-        top: 100vh;
-        font-size: 2rem;
-        color: rgba(255, 255, 255, 0.1);
-        pointer-events: none;
-        z-index: 1;
-        animation: loginFloatUp 15s infinite linear;
-      `;
-      document.body.appendChild(heart);
-      setTimeout(() => heart.remove(), 15000);
-    };
-
-    // Create particles
-    const createParticle = () => {
-      const particle = document.createElement('div');
-      particle.className = 'login-particle';
-      particle.style.cssText = `
-        position: fixed;
-        width: 4px;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 50%;
-        left: ${Math.random() * 100}vw;
-        top: 100vh;
-        pointer-events: none;
-        z-index: 2;
-        animation: particleFloat ${Math.random() * 3 + 2}s linear forwards;
-      `;
-      document.body.appendChild(particle);
-      setTimeout(() => particle.remove(), 5000);
-    };
-
-    const heartInterval = setInterval(createFloatingHeart, 2000);
-    const particleInterval = setInterval(createParticle, 300);
-
-    return () => {
-      clearInterval(heartInterval);
-      clearInterval(particleInterval);
-    };
-  }, []);
-
-  // Mouse follow effect
-  useEffect(() => {
-    let mouseX = 0;
-    let mouseY = 0;
-    let cardX = 0;
-    let cardY = 0;
-
-    const handleMouseMove = (e) => {
-      mouseX = (e.clientX - window.innerWidth / 2) / 50;
-      mouseY = (e.clientY - window.innerHeight / 2) / 50;
-    };
-
-    const animateCard = () => {
-      cardX += (mouseX - cardX) * 0.1;
-      cardY += (mouseY - cardY) * 0.1;
-      
-      const loginCard = document.querySelector('.login-card');
-      if (loginCard) {
-        loginCard.style.transform = `translateY(0px) rotateX(${cardY}deg) rotateY(${cardX}deg)`;
+    const generateHearts = () => {
+      const newHearts = [];
+      for (let i = 0; i < 15; i++) {
+        newHearts.push({
+          id: i,
+          left: Math.random() * 100,
+          delay: Math.random() * 5,
+          duration: 3 + Math.random() * 2,
+          size: 0.5 + Math.random() * 0.5
+        });
       }
-      
-      requestAnimationFrame(animateCard);
+      setHearts(newHearts);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    animateCard();
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-    };
+    generateHearts();
+    const interval = setInterval(generateHearts, 10000);
+    return () => clearInterval(interval);
   }, []);
-
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validatePassword = (password) => {
-    return password.length >= 6;
-  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Real-time validation
-    const newValidationErrors = { ...validationErrors };
-    
-    if (name === 'email') {
-      if (value === '') {
-        delete newValidationErrors.email;
-      } else if (validateEmail(value)) {
-        newValidationErrors.email = 'valid';
-      } else {
-        newValidationErrors.email = 'invalid';
-      }
-    }
-
-    if (name === 'password') {
-      if (value === '') {
-        delete newValidationErrors.password;
-      } else if (validatePassword(value)) {
-        newValidationErrors.password = 'valid';
-      } else {
-        newValidationErrors.password = 'invalid';
-      }
-    }
-
-    setValidationErrors(newValidationErrors);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      // Simulate API call
-      await simulateLogin(formData.email, formData.password);
-      setSuccess(true);
-      
-      // Store authentication status
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userEmail', formData.email);
-      
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
-    } catch (err) {
-      setError('Email atau password salah. Silakan coba lagi.');
-      // Add shake animation
-      const loginCard = document.querySelector('.login-card');
-      if (loginCard) {
-        loginCard.classList.add('shake');
-        setTimeout(() => {
-          loginCard.classList.remove('shake');
-        }, 500);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const simulateLogin = async (email, password) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Demo credentials for success
-        if (email === 'couple@love.com' && password === 'password123') {
-          resolve();
-        } else {
-          reject(new Error('Invalid credentials'));
-        }
-      }, 2000);
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
     });
   };
 
-  const handleSocialLogin = (provider) => {
-    alert(`Login dengan ${provider} akan segera tersedia!`);
-  };
-
-  const handleForgotPassword = () => {
-    alert('Fitur lupa password akan segera tersedia! 🔑');
-  };
-
-  const handleRegister = () => {
-    alert('Halaman registrasi akan segera tersedia! 📝');
-  };
-
-  const handleBack = () => {
-    navigate('/');
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+    // Handle authentication logic here
   };
 
   return (
-    <div className="login-page">
-      {/* Back Button */}
-      <button className="back-button" onClick={handleBack}>
-        <span>←</span>
-        <span>Kembali</span>
-      </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
-      {/* Login Container */}
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <div className="logo">💕</div>
-            <h1 className="login-title">Selamat Datang</h1>
-            <p className="login-subtitle">Masuk ke dunia cinta kalian</p>
+      {/* Floating Hearts */}
+      <div className="absolute inset-0 pointer-events-none">
+        {hearts.map((heart) => (
+          <div
+            key={heart.id}
+            className="absolute animate-float-up"
+            style={{
+              left: `${heart.left}%`,
+              animationDelay: `${heart.delay}s`,
+              animationDuration: `${heart.duration}s`,
+              transform: `scale(${heart.size})`
+            }}
+          >
+            <Heart className="w-6 h-6 text-pink-400 opacity-60" fill="currentColor" />
+          </div>
+        ))}
+      </div>
+
+      {/* Main Container */}
+      <div className="relative z-10 w-full max-w-md">
+        {/* Logo/Header */}
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="relative inline-block">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-pink-400 rounded-full blur-lg opacity-40 animate-pulse"></div>
+            <Heart className="w-16 h-16 mx-auto text-pink-500 relative animate-heartbeat" fill="currentColor" />
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent mt-4 mb-2">
+            Our Love Story
+          </h1>
+          <p className="text-gray-600">
+            {isLogin ? 'Masuk ke dunia kenangan kalian' : 'Mulai perjalanan cinta kalian'}
+          </p>
+        </div>
+
+        {/* Form Container */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 transform transition-all duration-500 hover:shadow-3xl animate-slide-up">
+          {/* Form Toggle */}
+          <div className="flex bg-gray-100 rounded-2xl p-1 mb-8">
+            <button
+              onClick={() => setIsLogin(true)}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
+                isLogin
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Masuk
+            </button>
+            <button
+              onClick={() => setIsLogin(false)}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
+                !isLogin
+                  ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Daftar
+            </button>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {!isLogin && (
+              <>
+                {/* Name Field */}
+                <div className="group">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
+                    Nama Anda
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-all duration-300 bg-gray-50 focus:bg-white"
+                      placeholder="Masukkan nama Anda"
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
 
-          {/* Success Checkmark */}
-          {success && (
-            <div className="success-checkmark">
-              <div className="checkmark">✓</div>
-            </div>
-          )}
+                {/* Partner Name Field */}
+                <div className="group">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
+                    Nama Pasangan
+                  </label>
+                  <div className="relative">
+                    <Heart className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-pink-500 transition-colors" />
+                    <input
+                      type="text"
+                      name="partnerName"
+                      value={formData.partnerName}
+                      onChange={handleInputChange}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:border-pink-500 focus:outline-none transition-all duration-300 bg-gray-50 focus:bg-white"
+                      placeholder="Masukkan nama pasangan"
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
-          <form className="login-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <input
-                type="email"
-                name="email"
-                className={`form-input ${
-                  validationErrors.email === 'valid' ? 'success' : 
-                  validationErrors.email === 'invalid' ? 'error' : ''
-                }`}
-                placeholder=" "
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-              <div className="form-icon">📧</div>
-              <label className="form-label">Email</label>
-            </div>
-
-            <div className="form-group">
-              <input
-                type="password"
-                name="password"
-                className={`form-input ${
-                  validationErrors.password === 'valid' ? 'success' : 
-                  validationErrors.password === 'invalid' ? 'error' : ''
-                }`}
-                placeholder=" "
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-              />
-              <div className="form-icon">🔒</div>
-              <label className="form-label">Password</label>
-            </div>
-
-            <div className="forgot-password">
-              <a onClick={handleForgotPassword}>Lupa password?</a>
-            </div>
-
-            <button 
-              type="submit" 
-              className="login-button"
-              disabled={isLoading}
-            >
-              <div className="button-content">
-                {isLoading ? (
-                  <>
-                    <div className="spinner"></div>
-                    <span>Masuk...</span>
-                  </>
-                ) : (
-                  <span>Masuk</span>
-                )}
+            {/* Email Field */}
+            <div className="group">
+              <label className="block text-gray-700 text-sm font-semibold mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-all duration-300 bg-gray-50 focus:bg-white"
+                  placeholder="masukkan@email.com"
+                  required
+                />
               </div>
+            </div>
+
+            {/* Password Field */}
+            <div className="group">
+              <label className="block text-gray-700 text-sm font-semibold mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-all duration-300 bg-gray-50 focus:bg-white"
+                  placeholder="Masukkan password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-4 w-5 h-5 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
+            </div>
+
+            {!isLogin && (
+              <div className="group">
+                <label className="block text-gray-700 text-sm font-semibold mb-2">
+                  Konfirmasi Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-pink-500 transition-colors" />
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:border-pink-500 focus:outline-none transition-all duration-300 bg-gray-50 focus:bg-white"
+                    placeholder="Konfirmasi password"
+                    required={!isLogin}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className={`group w-full py-4 px-6 rounded-2xl font-bold text-lg text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 ${
+                isLogin
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
+                  : 'bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700'
+              }`}
+            >
+              <span>{isLogin ? 'Masuk' : 'Daftar'}</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </form>
 
-          <div className="divider">
-            <span>atau masuk dengan</span>
+          {/* Additional Options */}
+          <div className="mt-8 text-center space-y-4">
+            {isLogin && (
+              <a href="#" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                Lupa password?
+              </a>
+            )}
+            
+            <div className="flex items-center space-x-2 justify-center">
+              <Sparkles className="w-4 h-4 text-purple-500" />
+              <span className="text-gray-600 text-sm">
+                {isLogin ? 'Belum punya akun?' : 'Sudah punya akun?'}
+              </span>
+              <button
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-purple-600 hover:text-purple-700 font-medium transition-colors"
+              >
+                {isLogin ? 'Daftar di sini' : 'Masuk di sini'}
+              </button>
+            </div>
           </div>
+        </div>
 
-          <div className="social-login">
-            <button 
-              className="social-button google" 
-              onClick={() => handleSocialLogin('Google')}
-            >
-              <span>🔍</span>
-              <span>Google</span>
-            </button>
-            <button 
-              className="social-button facebook" 
-              onClick={() => handleSocialLogin('Facebook')}
-            >
-              <span>📘</span>
-              <span>Facebook</span>
-            </button>
-          </div>
-
-          <div className="register-link">
-            <p>
-              Belum punya akun?{' '}
-              <a onClick={handleRegister}>Daftar di sini</a>
-            </p>
-          </div>
+        {/* Footer */}
+        <div className="text-center mt-8 text-gray-500 text-sm animate-fade-in">
+          <p>Dibuat dengan ❤️ untuk pasangan yang saling mencinta</p>
         </div>
       </div>
 
-      {/* Demo Info */}
-      <div className="demo-info">
-        <strong>Demo Login:</strong><br />
-        Email: couple@love.com<br />
-        Password: password123
-      </div>
+      {/* Custom Styles */}
+      <style jsx>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        
+        @keyframes float-up {
+          0% { 
+            transform: translateY(100vh) rotate(0deg);
+            opacity: 0;
+          }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { 
+            transform: translateY(-100px) rotate(360deg);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes heartbeat {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+        
+        @keyframes fade-in {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slide-up {
+          0% { opacity: 0; transform: translateY(40px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+        
+        .animate-float-up {
+          animation: float-up linear infinite;
+        }
+        
+        .animate-heartbeat {
+          animation: heartbeat 2s ease-in-out infinite;
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
+        }
+        
+        .animate-slide-up {
+          animation: slide-up 0.8s ease-out;
+        }
+        
+        .shadow-3xl {
+          box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+        }
+      `}</style>
     </div>
   );
 };
