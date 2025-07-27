@@ -189,7 +189,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-pink-50 to-purple-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-pink-50 to-purple-50 flex overflow-hidden">
       {/* Sidebar Component dengan props untuk collapse */}
       <Sidebar 
         isOpen={sidebarOpen} 
@@ -199,9 +199,9 @@ const Dashboard = () => {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 max-h-screen overflow-hidden">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-30">
+        <header className="bg-white shadow-sm border-b border-gray-100 flex-shrink-0 z-30">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center space-x-4">
               <button
@@ -240,8 +240,9 @@ const Dashboard = () => {
           </div>
         </header>
 
-        {/* Content */}
-        <main className="p-6 flex-1 overflow-y-auto">
+        {/* Content - dengan tinggi yang disesuaikan dan single scroll */}
+        <main className="p-6 flex-1 overflow-y-auto main-scroll"
+              style={{ height: 'calc(100vh - 80px)' }}>
           {/* Welcome Section */}
           <div className="bg-gradient-to-r from-pink-500 to-blue-500 rounded-2xl p-8 text-white mb-8 relative overflow-hidden">
             <div className="relative z-10">
@@ -343,8 +344,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Rest of Dashboard content... */}
-          <div className="grid lg:grid-cols-2 gap-8">
+          {/* Rest of Dashboard content dengan spacing yang disesuaikan */}
+          <div className="grid lg:grid-cols-2 gap-6 mb-6">
             {/* Recent Activities */}
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center">

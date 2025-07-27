@@ -306,43 +306,44 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed, onCollapse }) => {
         `}
       >
         {/* User Profile Section */}
-        <div className="bg-gradient-to-r from-pink-500 to-blue-500 text-white p-6 relative">
+        <div className="bg-white text-white p-6 relative">
           <div className={`text-center transition-all duration-300 ${isCollapsed ? 'px-0' : ''}`}>
-            {/* Love Icon - Click to toggle collapse */}
-            <button
-              onClick={onCollapse}
-              className={`mx-auto mb-3 text-4xl flex items-center justify-center bg-white bg-opacity-20 rounded-full transition-all duration-300 hover:bg-opacity-30 hover:scale-110 active:scale-95 ${
-                isCollapsed ? 'w-8 h-8 text-lg' : 'w-16 h-16'
-              }`}
-              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            >
-              {userProfile.avatar}
-            </button>
-            
-            {/* User Info - Only show when not collapsed */}
-            {!isCollapsed && (
-              <div className="transition-opacity duration-300">
-                <h3 className="text-lg font-semibold mb-1">
-                  {userProfile.name}
-                </h3>
-                <p className="text-pink-100 text-sm mb-1">
-                  {user?.email || 'demo@lovestory.com'}
-                </p>
-                <p className="text-pink-200 text-xs">
-                  {userProfile.relationship}
-                </p>
-              </div>
-            )}
-          </div>
-          
-          {/* Collapse hint text */}
-          {!isCollapsed && (
-            <div className="absolute bottom-2 left-0 right-0 text-center">
-              <p className="text-pink-200 text-xs opacity-75">
-                💡 Klik love icon untuk collapse
-              </p>
+            {/* Logo Section dengan text brand */}
+            <div className={`flex items-center justify-center mb-3 transition-all duration-300 ${
+              isCollapsed ? 'flex-col' : 'flex-row space-x-3'
+            }`}>
+              {/* Logo Button */}
+              <button
+                onClick={onCollapse}
+                className={`flex items-center justify-center bg-white bg-opacity-20 rounded-full transition-all duration-300 hover:bg-opacity-30 hover:scale-110 active:scale-95 ${
+                  isCollapsed ? 'w-12 h-12' : 'w-14 h-14'
+                }`}
+                title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              >
+                <img 
+                  src="./public/Logo Bucinconnect.png" 
+                  alt="BucinConnect Logo"
+                  className={`transition-all duration-300 object-contain ${
+                    isCollapsed ? 'w-12 h-12' : 'w-20 h-20'
+                  }`}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain'
+                  }}
+                />
+              </button>
+              
+              {/* Brand Text - Only show when expanded */}
+              {!isCollapsed && (
+                <div className="transition-all duration-300 opacity-100">
+                  <h2 className="text-xl font-bold text-black tracking-wide">
+                    BucinConnect
+                  </h2>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Sidebar Content */}
