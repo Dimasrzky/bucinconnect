@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Heart, Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
+import { AuthContext } from '../App';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -39,12 +45,63 @@ const LoginPage = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user starts typing
+    if (error) setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Handle authentication logic here
+    setLoading(true);
+    setError('');
+
+    try {
+      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const payload = isLogin 
+        ? { email: formData.email, password: formData.password }
+        : { 
+            email: formData.email, 
+            password: formData.password, 
+            name: formData.name, 
+            partnerName: formData.partnerName 
+          };
+
+      // Validation for register
+      if (!isLogin) {
+        if (formData.password !== formData.confirmPassword) {
+          setError('Password tidak sama');
+          setLoading(false);
+          return;
+        }
+        if (formData.password.length < 6) {
+          setError('Password minimal 6 karakter');
+          setLoading(false);
+          return;
+        }
+      }
+
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Login successful
+        login(data.token, data.user);
+        navigate('/dashboard');
+      } else {
+        setError(data.message || 'Terjadi kesalahan');
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      setError('Tidak dapat terhubung ke server');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,7 +140,7 @@ const LoginPage = () => {
             <Heart className="w-16 h-16 mx-auto text-pink-500 relative animate-heartbeat" fill="currentColor" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent mt-4 mb-2">
-            Our Love Story
+            BucinConnect
           </h1>
           <p className="text-gray-600">
             {isLogin ? 'Masuk ke dunia kenangan kalian' : 'Mulai perjalanan cinta kalian'}
@@ -95,7 +152,17 @@ const LoginPage = () => {
           {/* Form Toggle */}
           <div className="flex bg-gray-100 rounded-2xl p-1 mb-8">
             <button
-              onClick={() => setIsLogin(true)}
+              onClick={() => {
+                setIsLogin(true);
+                setError('');
+                setFormData({
+                  email: '',
+                  password: '',
+                  name: '',
+                  partnerName: '',
+                  confirmPassword: ''
+                });
+              }}
               className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
                 isLogin
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
@@ -105,7 +172,17 @@ const LoginPage = () => {
               Masuk
             </button>
             <button
-              onClick={() => setIsLogin(false)}
+              onClick={() => {
+                setIsLogin(false);
+                setError('');
+                setFormData({
+                  email: '',
+                  password: '',
+                  name: '',
+                  partnerName: '',
+                  confirmPassword: ''
+                });
+              }}
               className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
                 !isLogin
                   ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg'
@@ -114,6 +191,21 @@ const LoginPage = () => {
             >
               Daftar
             </button>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Demo Mode Notice */}
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <p className="text-blue-600 text-sm">
+              <Sparkles className="w-4 h-4 inline mr-2" />
+              Mode Demo: Gunakan email/password apapun untuk masuk
+            </p>
           </div>
 
           {/* Form */}
@@ -228,23 +320,35 @@ const LoginPage = () => {
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={loading}
               className={`group w-full py-4 px-6 rounded-2xl font-bold text-lg text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 ${
-                isLogin
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
-                  : 'bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700'
+                loading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : isLogin
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
+                    : 'bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700'
               }`}
             >
-              <span>{isLogin ? 'Masuk' : 'Daftar'}</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Loading...</span>
+                </>
+              ) : (
+                <>
+                  <span>{isLogin ? 'Masuk' : 'Daftar'}</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </button>
           </form>
 
           {/* Additional Options */}
           <div className="mt-8 text-center space-y-4">
             {isLogin && (
-              <a href="#" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              <button className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
                 Lupa password?
-              </a>
+              </button>
             )}
             
             <div className="flex items-center space-x-2 justify-center">
@@ -253,7 +357,18 @@ const LoginPage = () => {
                 {isLogin ? 'Belum punya akun?' : 'Sudah punya akun?'}
               </span>
               <button
-                onClick={() => setIsLogin(!isLogin)}
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError('');
+                  setFormData({
+                    email: '',
+                    password: '',
+                    name: '',
+                    partnerName: '',
+                    confirmPassword: ''
+                  });
+                }}
                 className="text-purple-600 hover:text-purple-700 font-medium transition-colors"
               >
                 {isLogin ? 'Daftar di sini' : 'Masuk di sini'}
@@ -266,10 +381,20 @@ const LoginPage = () => {
         <div className="text-center mt-8 text-gray-500 text-sm animate-fade-in">
           <p>Dibuat dengan ❤️ untuk pasangan yang saling mencinta</p>
         </div>
+
+        {/* Back to Home */}
+        <div className="text-center mt-4">
+          <button
+            onClick={() => navigate('/')}
+            className="text-gray-600 hover:text-gray-800 font-medium transition-colors"
+          >
+            ← Kembali ke Home
+          </button>
+        </div>
       </div>
 
-      {/* Custom Styles */}
-      <style jsx>{`
+      {/* Custom CSS Classes */}
+      <style>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }

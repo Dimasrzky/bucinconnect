@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Calendar, Music, Camera, Users, Star, Gift, Clock, Gamepad2, Archive } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Heart, Calendar, Music, Users, Star, Gift, Clock, Gamepad2, Archive } from 'lucide-react';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
 
@@ -30,6 +32,10 @@ const LandingPage = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  const handleStartJourney = () => {
+    navigate('/login');
+  };
 
   const features = [
     {
@@ -116,7 +122,7 @@ const LandingPage = () => {
           </div>
           
           <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6 animate-fade-in">
-            Our Love Story
+            BucinConnect
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -124,12 +130,18 @@ const LandingPage = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-semibold text-lg hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+            <button 
+              onClick={handleStartJourney}
+              className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-semibold text-lg hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
               <span className="relative z-10">Mulai Perjalanan</span>
               <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-pink-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
             
-            <button className="px-8 py-4 border-2 border-pink-500 text-pink-600 rounded-full font-semibold text-lg hover:bg-pink-500 hover:text-white transform hover:scale-105 transition-all duration-300">
+            <button 
+              onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
+              className="px-8 py-4 border-2 border-pink-500 text-pink-600 rounded-full font-semibold text-lg hover:bg-pink-500 hover:text-white transform hover:scale-105 transition-all duration-300"
+            >
               Pelajari Lebih Lanjut
             </button>
           </div>
@@ -207,7 +219,10 @@ const LandingPage = () => {
               <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
                 Bergabunglah dengan ribuan pasangan yang telah mempercayai platform kami untuk menyimpan kenangan indah mereka
               </p>
-              <button className="px-10 py-4 bg-white text-purple-600 rounded-full font-bold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 shadow-lg">
+              <button 
+                onClick={handleStartJourney}
+                className="px-10 py-4 bg-white text-purple-600 rounded-full font-bold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 shadow-lg"
+              >
                 Daftar Sekarang - Gratis!
               </button>
             </div>
@@ -231,8 +246,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Custom Styles */}
-      <style jsx>{`
+      {/* Custom CSS Classes */}
+      <style>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
