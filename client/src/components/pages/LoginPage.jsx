@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
-import { AuthContext } from '../App';
+import { AuthContext } from '../../App';
 
 const LoginPage = () => {
   const navigate = useNavigate();

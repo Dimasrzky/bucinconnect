@@ -5,8 +5,8 @@ import {
   Gamepad2, Archive, Plus, TrendingUp, User, Menu, X,
   ChevronRight, Sparkles, BarChart3, MessageCircle
 } from 'lucide-react';
-import { AuthContext } from '../App';
-import Sidebar from './layout/Sidebar'; // Import Sidebar component
+import { AuthContext } from '../../App';
+import Sidebar from '../layout/Sidebar'; // Import Sidebar component
 
 const Dashboard = () => {
   const navigate = useNavigate();
